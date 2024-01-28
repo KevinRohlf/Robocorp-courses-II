@@ -50,6 +50,7 @@ def fill_the_form(order):
 
 
 def orders():
+    """starts fill_the_form & embed_screenshot_to_receipt for every row in the csv file"""
     orders = get_orders()
     for row in orders:
         fill_the_form(row)
@@ -62,7 +63,7 @@ def get_orders():
     return orders
 
 def save_order_html(order_number):
-    """save the order HTML in PDF file"""
+    """save the order HTML in PDF file & starts the screenshot_robot function"""
     page = browser.page()   
     order_html = page.locator("#receipt").inner_html()
     pdf = PDF()
@@ -71,25 +72,28 @@ def save_order_html(order_number):
     page.click("button:text('Order another robot')")
     
 def screenshot_robot(order_number):
+    """take a screenshot from the robot preview"""
     page = browser.page()
     loc = page.locator("#robot-preview-image")
     loc.screenshot(path=f"output/screen-{order_number}.png")
     
 def embed_screenshot_to_receipt(screenshot, pdf_file):
+    """merge the Screenshot to the receipt PDF file"""
     pdf = PDF()
     list = [
         f"{screenshot}:align=center",
     ]
     pdf.add_files_to_pdf(files=list, target_document=pdf_file, append=True)
 
-def submit_form(test):
+def submit_form(order_number):
+    """Submit the form with error check"""
     page = browser.page()
     visible = page.locator("#receipt").is_visible()    
     if visible :
-        save_order_html(test)
+        save_order_html(order_number)
     else:
         page.click("button:text('Order')")
-        submit_form(test)
+        submit_form(order_number)
         
 
 
