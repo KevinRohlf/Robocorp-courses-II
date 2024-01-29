@@ -4,7 +4,7 @@ from robocorp import browser
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
-from RPA.Browser.Selenium import Selenium
+from RPA.Archive import Archive
 
 
 @task
@@ -23,6 +23,7 @@ def order_robots_from_RobotSpareBin():
     download_csv_file()
     open_robot_order_website()
     orders()
+    archive_receipts()
 
 
 def open_robot_order_website():
@@ -54,7 +55,7 @@ def orders():
     orders = get_orders()
     for row in orders:
         fill_the_form(row)
-        embed_screenshot_to_receipt(f"output/screen-{row['Order number']}.png", f"output/order-{row['Order number']}.pdf")
+        embed_screenshot_to_receipt(f"output/screen-{row['Order number']}.png", f"output/receipt/order-{row['Order number']}.pdf")
 
 def get_orders():
     """get the orders from CSV file"""
@@ -67,7 +68,7 @@ def save_order_html(order_number):
     page = browser.page()   
     order_html = page.locator("#receipt").inner_html()
     pdf = PDF()
-    pdf.html_to_pdf(order_html, f"output/order-{order_number}.pdf")
+    pdf.html_to_pdf(order_html, f"output/receipt/order-{order_number}.pdf")
     screenshot_robot(order_number)
     page.click("button:text('Order another robot')")
     
@@ -94,6 +95,10 @@ def submit_form(order_number):
     else:
         page.click("button:text('Order')")
         submit_form(order_number)
+        
+def archive_receipts():
+    archive = Archive()
+    archive.archive_folder_with_zip(folder="output/receipt", archive_name="output/receipts.zip")
         
 
 
